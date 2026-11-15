@@ -271,7 +271,8 @@ See §7: result recorded when filed.
 The run is therefore **incomplete against the Full run stop conditions**; the resume point is a WHOLE round (all required seats, plus the three unseated ones) on this build, twice, quiet.
 
 ## 7. R5 result
-(filled when the scoped re-check files)
+Cairo, R5 (scoped re-check of the R4 objection, 600 seeds x every palette): **PASS**. Island descriptions give a percentage only where sea and land have different colours (NES, C64, SNES: 600/600, 0 off by more than 1 point); every named feature has a colour no other present role shares (0 defects); Game Boy and PICO-8 say the sea shares shades with the land (600/600). Pixels unchanged (68416de5). Printed sentences reproduce. The palettes tile does not clip at 859, 860, 900, 1000, 1001, 1024, 1280 or 375. The fixture (the old role-map percentage on Game Boy) fails 300/300 as it must. Not audited by Cairo: the README Stack row and the Stack heading rewording (read by Debord in R4, who asked for them).
+This was a scoped re-check by one seat, not a WHOLE round, so it does not satisfy S2 or S3.
 
 ## 8. Double loop, graph amendment, steps skipped
 Double loop: the **panel** failed the work twice: R1 and R4 each found a false claim that the build's own checks could not catch (a printed number, a description). The criterion held; the process did not measure printed claims or generated text against the pixels until a seat did. Amendment: add to `references/measurement-checklist.md` "run every generated sentence against the artifact's pixels, across hundreds of seeds, before the panel sees it". Graph amendment: add a dotted edge from `Critic: Evidence (Cairo)` to the generated-text check, and a rule node for colour-vision-deficiency distance beside WCAG 2.2.
