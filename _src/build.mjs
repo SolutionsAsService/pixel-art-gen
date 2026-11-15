@@ -105,7 +105,7 @@ pages.index = page({ file: 'index', zone: 'studio', title: 'PIXELGEN: 8-bit and 
   body: `<section class="slab" aria-labelledby="h1"><div class="wrap">
 <h1 id="h1" class="sr">PIXELGEN: 8-bit and 16-bit pixel art generator</h1>
 <div class="hero-mark">${WM}</div>
-<p class="lede">Creatures, heroes, items and islands in the colour limits of real consoles. Same seed, same pixels, every time.</p>
+<p class="lede">Creatures, heroes, items and islands in the exact colour sets of real consoles. Same seed, same pixels, every time.</p>
 <ul class="poster" aria-label="What PIXELGEN holds">
 <li class="tile" data-z="studio"><a href="/studio?kind=hero&amp;bits=16&amp;seed=ember-3"><span class="art">${svg(tHero, { label: tHero.alt })}</span>
 <span class="name">Studio</span><span class="fig">${kindsN} kinds, 8 or 16 bit</span><span class="go">Make one</span></a></li>
@@ -114,13 +114,13 @@ pages.index = page({ file: 'index', zone: 'studio', title: 'PIXELGEN: 8-bit and 
 <li class="tile" data-z="sheets"><a href="/sheets"><span class="art">${svgRGBA(tSheet, 'A sprite sheet of four sprites: two 8-bit and two 16-bit creatures and items')}</span>
 <span class="name">Sheets</span><span class="fig">PNG atlas plus JSON frames</span><span class="go">Build a sheet</span></a></li>
 <li class="tile" data-z="stack"><a href="/stack"><span class="art">${svg(tIsle, { label: tIsle.alt })}</span>
-<span class="name">Stack</span><span class="fig">Atlas and command line for the SHADW stack</span><span class="go">See the fit</span></a></li>
+<span class="name">Stack</span><span class="fig">Atlas and command line for the SHADW stack</span><span class="go">See the stack</span></a></li>
 </ul></div></section>
 <section class="wrap band"><h2>Why it looks right</h2>
 <ul class="cols">
 <li><h3>Real limits</h3><p>8-bit creatures, heroes and items are three colours and transparent, the NES rule (Game Boy: its four greens). 16-bit sprites sit inside the ${snes.toLocaleString('en')}-colour SNES and ${md}-colour Mega Drive colour sets and use at most ten colours, under the limit of 15. Colour is exact; sprite sizes, scanlines and tiles are not simulated.</p></li>
 <li><h3>Hand-made habits</h3><p>Dark outline, rim light top left, shade bottom right, and shadows that drift cool while lights drift warm. Islands dither between bands on 16-bit and band flat on 8-bit.</p></li>
-<li><h3>Seeded</h3><p>A seed, a kind, a depth and a palette name one sprite for good. The browser and the command line draw identical pixels.</p></li>
+<li><h3>Seeded</h3><p>A seed is a short code that always redraws the same sprite. A seed, a kind, a depth and a palette name one sprite for good. The browser and the command line draw identical pixels.</p></li>
 </ul></section>`, script: false });
 
 // Studio
@@ -136,7 +136,7 @@ pages.studio = page({ file: 'studio', zone: 'studio', title: 'Studio · PIXELGEN
 <label class="chip"><input type="radio" name="bits" value="8" checked><span>8-bit</span></label>
 <label class="chip"><input type="radio" name="bits" value="16"><span>16-bit</span></label></div></fieldset>
 <label class="field">Palette<select id="palette" name="palette"></select></label>
-<label class="field">Seed<input id="seed" name="seed" type="text" value="ember" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40"></label>
+<label class="field">Seed <small>a code that redraws the same sprite</small><input id="seed" name="seed" type="text" value="ember" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40"></label>
 <div class="row"><button type="button" id="reroll" class="btn signal">Reroll</button></div>
 </form>
 <div class="stage">
@@ -147,7 +147,7 @@ pages.studio = page({ file: 'studio', zone: 'studio', title: 'Studio · PIXELGEN
 <div class="actions">
 <label class="field small">Download size<select id="scale"><option value="1">1x</option><option value="4">4x</option><option value="8" selected>8x</option><option value="16">16x</option></select></label>
 <button type="button" id="dl" class="btn">Download PNG</button>
-<button type="button" id="copy" class="btn">Copy link</button>
+<button type="button" id="copy" class="btn">Copy link to this sprite</button>
 <button type="button" id="add" class="btn">Add to sheet</button></div>
 <p id="status" class="status" role="status"></p>
 <noscript><p class="status">The generator needs JavaScript. The pictures on the other pages do not.</p></noscript>
@@ -176,7 +176,7 @@ pages.palettes = page({ file: 'palettes', zone: 'palettes', title: 'Palettes · 
 // Sheets
 pages.sheets = page({ file: 'sheets', zone: 'sheets', title: 'Sheets · PIXELGEN', desc: 'Build a sprite sheet from a seed and download it as one PNG with a JSON atlas of frame positions, ready for a game engine.',
   body: `<div class="wrap"><h1>Sheets</h1>
-<p class="lede">Make a batch from one seed, or add the sprites you picked in the Studio. Download one PNG and a JSON atlas that says where every frame sits.</p>
+<p class="lede">Make a batch from one seed, or add the sprites you picked in the Studio. Download one PNG and a JSON atlas, a map of where each sprite sits in it.</p>
 <form id="sheetform" class="controls wide" aria-label="Sheet controls" onsubmit="return false">
 <label class="field">Kind<select id="s-kind">${Object.entries(KINDS).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('')}</select></label>
 <label class="field">Depth<select id="s-bits"><option value="8">8-bit</option><option value="16">16-bit</option></select></label>

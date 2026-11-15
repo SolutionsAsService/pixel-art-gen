@@ -33,7 +33,7 @@
 <label class="chip"><input type="radio" name="bits" value="8" checked><span>8-bit</span></label>
 <label class="chip"><input type="radio" name="bits" value="16"><span>16-bit</span></label></div></fieldset>
 <label class="field">Palette<select id="palette" name="palette"></select></label>
-<label class="field">Seed<input id="seed" name="seed" type="text" value="ember" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40"></label>
+<label class="field">Seed <small>a code that redraws the same sprite</small><input id="seed" name="seed" type="text" value="ember" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40"></label>
 <div class="row"><button type="button" id="reroll" class="btn signal">Reroll</button></div>
 </form>
 <div class="stage">
@@ -44,7 +44,7 @@
 <div class="actions">
 <label class="field small">Download size<select id="scale"><option value="1">1x</option><option value="4">4x</option><option value="8" selected>8x</option><option value="16">16x</option></select></label>
 <button type="button" id="dl" class="btn">Download PNG</button>
-<button type="button" id="copy" class="btn">Copy link</button>
+<button type="button" id="copy" class="btn">Copy link to this sprite</button>
 <button type="button" id="add" class="btn">Add to sheet</button></div>
 <p id="status" class="status" role="status"></p>
 <noscript><p class="status">The generator needs JavaScript. The pictures on the other pages do not.</p></noscript>

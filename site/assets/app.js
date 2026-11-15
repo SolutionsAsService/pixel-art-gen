@@ -45,7 +45,7 @@ if (page === 'studio') {
     const seedsRand = (() => { let h = 0; for (const ch of vbase + '#v') h = (h * 31 + ch.charCodeAt(0)) >>> 0; let a = h; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; })();
     for (let i = 0; i < 12; i++) {
       const s = code(seedsRand), v = generate({ ...st, seed: s }), li = document.createElement('li'), b = document.createElement('button'), c = document.createElement('canvas');
-      b.type = 'button'; b.dataset.seed = s; b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', `Use seed ${s}: ${v.alt}`); draw(c, v, 88); b.append(c, Object.assign(document.createElement('span'), { textContent: s })); b.onclick = () => { st.seed = s; render(true, true); main.scrollIntoView({ block: 'nearest' }); say(`Seed ${s} selected. ${generate({ ...st, seed: s }).alt}`); };
+      b.type = 'button'; b.dataset.seed = s; b.title = v.alt; b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', `Use seed ${s}: ${v.alt}`); draw(c, v, 88); b.append(c, Object.assign(document.createElement('span'), { textContent: s })); b.onclick = () => { st.seed = s; render(true, true); main.scrollIntoView({ block: 'nearest' }); say(`Seed ${s} selected. ${generate({ ...st, seed: s }).alt}`); };
       li.append(b); grid.append(li);
     }
     if (updateUrl) url();
