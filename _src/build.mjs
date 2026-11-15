@@ -206,9 +206,9 @@ pages.stack = page({ file: 'stack', zone: 'stack', title: 'Stack · PIXELGEN', d
 <h2>Atlas format</h2>
 <p>An atlas is one picture plus a map of where each sprite sits. A sheet downloads as <code>sheet.png</code> plus <code>sheet.json</code>. Frames are in pixels, each has a short text description in <code>alt</code>, and each names the seed that makes it again.</p>
 <pre><code>${JSON.stringify(atlasDemo, null, 2).replace(/</g, '&lt;')}</code></pre>
-<h2>Where it fits</h2>
+<h2>Possible uses</h2>
 <ul class="fits">
-<li data-z="stack"><h3><a href="https://github.com/PrometheusIntelligence/shadw-terrain">SHADW Terrain</a></h3><p>Islands are small height-banded maps with a coast. A fit for test overworlds and thumbnails. Not wired in yet.</p></li>
+<li data-z="stack"><h3><a href="https://github.com/PrometheusIntelligence/shadw-terrain">SHADW Terrain</a></h3><p>Islands are small height-banded maps with a coast. Useful for test overworlds and thumbnails. Not wired in yet.</p></li>
 <li data-z="stack"><h3><a href="https://github.com/PrometheusIntelligence/shadw-game-store">SHADW Game Store</a></h3><p>Store art for a game that has none yet: capsule icons and placeholder screenshots. Not wired in yet.</p></li>
 <li data-z="stack"><h3><a href="https://github.com/SolutionsAsService/shadw-modding">SHADW Modding</a></h3><p>An art pack for a mod: a sheet, an atlas and the seeds that rebuild it. Not wired in yet.</p></li>
 <li data-z="stack"><h3><a href="https://github.com/SolutionsAsService/shadw-gaming-master">Gaming master index</a></h3><p>An index entry as a tool is proposed in that repository, pending merge to its main branch.</p></li></ul>

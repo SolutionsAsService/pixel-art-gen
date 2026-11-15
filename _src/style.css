@@ -136,3 +136,4 @@ summary{display:flex;align-items:center;min-height:44px;cursor:pointer;font-weig
 summary:focus-visible{outline:3px solid var(--signal);outline-offset:3px}
 .swatches span{font-size:13px}
 .variants button[aria-pressed=true]{border-color:var(--signal);box-shadow:4px 4px 0 var(--signal)}
+@media (min-width:860px) and (max-width:1000px){.tile .art.pal{gap:5px;padding:8px}}

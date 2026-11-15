@@ -282,10 +282,17 @@ export function describe(spr) {
     return `${a(body)} ${body} ${bits} creature with ${feats.join(', ').replace(/, ([^,]*)$/, ' and $1')}.`; }
   if (spr.kind === 'hero') return `${a(body)} ${body} ${bits} hero with ${HAIR[m.hair]}, carrying ${WEAPON[m.weapon]}${m.cape ? ', wearing a cape' : ''}.`;
   if (spr.kind === 'item') { const c = colourName(spr.colors[m.t === 0 ? 'wh' : m.t === 3 || m.t === 4 ? 'a2' : 'c2']); return `${a(c)} ${c} ${bits} ${ITEM[m.t]}.`; }
-  const n = { all: spr.d.length, water: 0, snow: 0, rock: 0, forest: 0 };
-  for (const v of spr.d) { if (v === R.wd || v === R.wl) n.water++; else if (v === R.sn) n.snow++; else if (v === R.rk) n.rock++; else if (v === R.fo) n.forest++; }
-  const land = Math.round((1 - n.water / n.all) * 100);
-  return `${spr.bits === 8 ? 'An' : 'A'} ${bits} island seen from above, about ${land}% land with sandy coast, grass${n.forest ? ', forest' : ''}${n.rock ? ', rock' : ''}${n.snow ? ' and a snowy peak' : ''}.`;
+  // Only say what the colours let a viewer see: a role is mentioned only if no other role present in the picture shares its colour.
+  const present = new Map(); for (const v of spr.d) present.set(v, (present.get(v) || 0) + 1);
+  const hexOf = (role) => toHex(spr.colors[ROLES[role]]), roles = [...present.keys()];
+  const clear = (role) => present.has(role) && roles.every((o) => o === role || hexOf(o) !== hexOf(role));
+  const water = [R.wd, R.wl], landRoles = roles.filter((r) => !water.includes(r));
+  const seaDistinct = water.filter((w) => present.has(w)).every((w) => landRoles.every((o) => hexOf(o) !== hexOf(w)));
+  const wn = water.reduce((t, w) => t + (present.get(w) || 0), 0), land = Math.round((1 - wn / spr.d.length) * 100);
+  const lead = `${spr.bits === 8 ? 'An' : 'A'} ${bits} island seen from above`;
+  if (!seaDistinct) return `${lead}; in ${PALETTES[spr.palette].label} colours the sea shares shades with the land.`;
+  const parts = ['grass', clear(R.fo) ? 'forest' : null, clear(R.rk) ? 'rock' : null].filter(Boolean);
+  return `${lead}, about ${land}% land with ${clear(R.sa) ? 'sandy coast, ' : ''}${parts.join(', ').replace(/, ([^,]*)$/, ' and $1')}${clear(R.sn) ? ', and a snowy peak' : ''}.`;
 }
 
 /** Generate a sprite. Returns { w, h, d (role indices), colors, id, usedColours }. */

@@ -13,7 +13,7 @@ A seed, a kind, a depth and a palette name one sprite for good: the browser and 
 | Studio | Pick kind, depth, palette and seed; download a PNG at 1x to 16x |
 | Palettes | The six palettes, their colour counts and the limits kept |
 | Sheets | Build a sprite sheet and download `sheet.png` plus a `sheet.json` atlas |
-| Stack | How it fits the other SHADW repos; atlas format; command line |
+| Stack | Atlas format, command line, and which SHADW repos it could serve (none wired yet) |
 
 ## Command line
 
