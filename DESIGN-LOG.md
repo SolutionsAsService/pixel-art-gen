@@ -285,7 +285,7 @@ Skipped or short: the R0 panel (not convened); three seated-by-picker seats (Shk
 - [x] Seed with exact labels, a dotted-edge counterpoint, a living Frontier
 - [x] Run type stated; no move broke its freeze (Full: none frozen)
 - [x] Mobile Floor measured (`check_floor.py` PASS at 360/390/430 at the end; at R0 only the inherited template's defects were listed, not measured); what needs a phone is in §8
-- [x] Shadw and Vercel configured: root and inner `vercel.json` (`framework: null`, empty install/build, `cleanUrls`, `fluid`, `outputDirectory` `site` and `.`), root `fluid.json` (`static_dir: site`, route `/` static), root `index.html` redirect, root-anchored `.vercelignore`, absolute `og:image` on `https://pixel-art-gen.shadw.app`. Checked by hand; **the build does not yet check these files**
+- [x] Shadw and Vercel configured: root and inner `vercel.json` (`framework: null`, empty install/build, `cleanUrls`, `fluid`, `outputDirectory` `site` and `.`), root `fluid.json` (`static_dir: site`, route `/` static), root `index.html` redirect, root-anchored `.vercelignore`, absolute `og:image` on `https://pixel-art-gen.shadw.app`. Checked by the build (`_src/build.mjs` fails on any mismatch; a fixture with `"fluid": false` fails it as it must)
 - [x] Palette from the topic, one hue per category, ΔE ≥ 30 and contrast measured light and dark, no meaning by hue alone (CVD limit stated)
 - [x] Landing leads with one bold poster summarising every page, measured complete at 1280x800 (bottom 749) and 375x812 (bottom 788)
 - [x] BREAK moves taken (M1, M3, M6)

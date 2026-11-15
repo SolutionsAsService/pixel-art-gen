@@ -1,5 +1,5 @@
 // Static site generator. `node _src/build.mjs` writes site/ (committed). No dependencies. Fails on a palette or config defect.
-import { mkdirSync, writeFileSync, copyFileSync, readFileSync, existsSync } from 'node:fs';
+import { mkdirSync, writeFileSync, copyFileSync, readFileSync, existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generate, toRGBA, packSheet, fingerprint, KINDS, PALETTES, paletteColourCount, ROLES, toHex, colourName } from './pixelgen.mjs';
@@ -240,4 +240,22 @@ w('favicon.svg', svg(demo('creature', 8, 'ash-1', 'nes'), { cls: '' }).replace('
 w('robots.txt', `User-agent: *\nAllow: /\nSitemap: ${SITE}/sitemap.xml\n`);
 w('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${['', 'studio', 'palettes', 'sheets', 'stack'].map((p) => `<url><loc>${SITE}/${p}</loc></url>`).join('\n')}\n</urlset>\n`);
 w('vercel.json', JSON.stringify({ $schema: 'https://openapi.vercel.sh/vercel.json', framework: null, installCommand: '', buildCommand: '', outputDirectory: '.', cleanUrls: true, fluid: true }, null, 2) + '\n');
+// ---------- deploy config check (fails the build if the Shadw/Vercel files are missing or disagree) ----------
+{
+  const bad = []; const rd = (p) => { try { return JSON.parse(readFileSync(join(root, p), 'utf8')); } catch { bad.push(`${p} missing or not JSON`); return {}; } };
+  const rv = rd('vercel.json'), iv = rd('site/vercel.json'), fl = rd('fluid.json');
+  for (const [n, v, dir] of [['vercel.json', rv, 'site'], ['site/vercel.json', iv, '.']]) {
+    if (v.framework !== null) bad.push(`${n}: framework must be null`);
+    if (v.installCommand !== '' || v.buildCommand !== '') bad.push(`${n}: install/build commands must be empty`);
+    if (v.outputDirectory !== dir) bad.push(`${n}: outputDirectory must be ${dir}`);
+    if (v.cleanUrls !== true || v.fluid !== true) bad.push(`${n}: cleanUrls and fluid must be true`);
+  }
+  if (fl.project !== 'pixel-art-gen' || fl.static_dir !== rv.outputDirectory) bad.push('fluid.json: project/static_dir disagree with vercel.json');
+  if (JSON.stringify(fl.routes) !== JSON.stringify([{ pattern: '/', target: 'static' }])) bad.push('fluid.json: routes must be exactly [{"pattern":"/","target":"static"}]');
+  if (!existsSync(join(root, 'index.html'))) bad.push('root index.html (redirect) missing');
+  const vi = existsSync(join(root, '.vercelignore')) ? readFileSync(join(root, '.vercelignore'), 'utf8').split('\n').filter(Boolean) : (bad.push('.vercelignore missing'), []);
+  for (const l of vi) if (!l.startsWith('/')) bad.push(`.vercelignore entry not anchored at the root: ${l}`);
+  for (const f of readdirSync(out).filter((x) => x.endsWith('.html'))) if (!readFileSync(join(out, f), 'utf8').includes(`content="${SITE}/assets/og.png"`)) bad.push(`${f}: og:image not absolute on ${SITE}`);
+  if (bad.length) { console.error('deploy config check failed:\n' + bad.join('\n')); process.exit(1); }
+}
 console.log(`built ${Object.keys(pages).length} pages; palette checks ${m.rows.length} ok; palettes=${palN} kinds=${kindsN} nes=${nesCount} snes=${snes} md=${md}`);
