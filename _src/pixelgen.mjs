@@ -48,11 +48,11 @@ const C64_ALL = ['#000000', '#FFFFFF', '#68372B', '#70A4B2', '#6F3D86', '#588D43
   '#9A6759', '#444444', '#6C6C6C', '#9AD284', '#6C5EB5', '#959595'];
 
 export const PALETTES = {
-  nes: { label: 'NES', bits: 8, note: 'Sprites use 3 colours plus clear', all: unique(NES_ROWS.flat().concat(NES_GREYS)) },
+  nes: { label: 'NES', bits: 8, note: 'Sprites use 3 colours plus transparent', all: unique(NES_ROWS.flat().concat(NES_GREYS)) },
   gb: { label: 'Game Boy', bits: 8, note: 'The four greens of the DMG screen', all: GB },
-  c64: { label: 'C64', bits: 8, note: 'Sprites use 3 colours plus clear', all: C64_ALL },
-  snes: { label: 'SNES', bits: 16, note: '15-bit colour. Sprites use up to 15 colours plus clear', depth: 5 },
-  genesis: { label: 'Mega Drive', bits: 16, note: '9-bit colour. Sprites use up to 15 colours plus clear', depth: 3 },
+  c64: { label: 'C64', bits: 8, note: 'Sprites use 3 colours plus transparent', all: C64_ALL },
+  snes: { label: 'SNES', bits: 16, note: '15-bit colour. Sprites use up to 15 colours plus transparent', depth: 5 },
+  genesis: { label: 'Mega Drive', bits: 16, note: '9-bit colour. Sprites use up to 15 colours plus transparent', depth: 3 },
   pico: { label: 'PICO-8', bits: 16, note: 'A fixed palette', all: ['#000000', '#1D2B53', '#7E2553', '#008751', '#AB5236', '#5F574F', '#C2C3C7', '#FFF1E8',
     '#FF004D', '#FFA300', '#FFEC27', '#00E436', '#29ADFF', '#83769C', '#FF77A8', '#FFCCAA'] },
 };
@@ -116,6 +116,13 @@ export function makePalette(id, bits, rand) {
   }
   return C;
 }
+
+// ---------- plain-language names ----------
+const NAMES = [['black', [0, 0, 0]], ['white', [250, 250, 250]], ['grey', [128, 128, 128]], ['light grey', [190, 190, 195]], ['red', [220, 40, 40]],
+  ['dark red', [120, 20, 20]], ['orange', [240, 140, 30]], ['brown', [120, 70, 30]], ['tan', [225, 195, 140]], ['yellow', [240, 220, 50]], ['olive', [125, 130, 30]],
+  ['lime', [150, 230, 40]], ['green', [40, 170, 60]], ['dark green', [20, 80, 40]], ['teal', [0, 140, 140]], ['cyan', [70, 220, 230]], ['sky blue', [90, 170, 250]],
+  ['blue', [40, 80, 230]], ['mint', [140, 230, 200]], ['light green', [150, 230, 140]], ['light blue', [160, 200, 250]], ['peach', [250, 200, 160]], ['lavender', [200, 180, 240]], ['dark blue', [20, 40, 150]], ['dark grey', [64, 64, 70]], ['salmon', [240, 120, 100]], ['gold', [200, 150, 20]], ['navy', [20, 30, 110]], ['purple', [130, 50, 170]], ['violet', [140, 120, 240]], ['magenta', [210, 30, 190]], ['pink', [245, 130, 170]], ['maroon', [130, 20, 70]]];
+export const colourName = (c) => NAMES.reduce((b, n) => (dist(n[1], c) < dist(b[1], c) ? n : b))[0];
 
 // ---------- grid helpers ----------
 const grid = (w, h) => ({ w, h, d: new Uint8Array(w * h) });
@@ -185,6 +192,7 @@ function creature(rand, bits) {
   for (let i = 0; i < 2; i++) rect(g, hw - 4 * u + i * 6 * u, bot + 1, 2 * u, Math.min(u, S - bot - 2) , R.a1);
   shade(g, bits, R.c2, [R.c1, R.c3]);
   outline(g);
+  g.meta = { ears, tail, fangs, eyes };
   return g;
 }
 
@@ -206,6 +214,7 @@ function hero(rand, bits) {
   if (bits === 16) { r(6, 8, 4, 1, R.c3); r(7, 3, 1, 1, R.sk); }
   shade(g, bits, R.c2, [R.c1, R.c3]);
   outline(g);
+  g.meta = { hair, weapon, cape };
   return g;
 }
 
@@ -226,6 +235,7 @@ function item(rand, bits) {
   }
   shade(g, bits, R.c2, [R.c1, R.c3]);
   outline(g);
+  g.meta = { t };
   return g;
 }
 
@@ -264,6 +274,20 @@ function island(rand, bits) {
 
 const MAKERS = { creature, hero, item, island };
 
+const EARS = ['antennae', 'round ears', 'no ears'], HAIR = ['a cap of hair', 'long hair', 'spiky hair'], WEAPON = ['a sword', 'a staff', 'a shield'], ITEM = ['sword', 'potion bottle', 'gem', 'key', 'coin'];
+/** One plain sentence saying what is drawn, for alt text and for people who cannot see the sprite. */
+export function describe(spr) {
+  const a = (n) => (/^[aeiou]/.test(n) ? 'An' : 'A'), body = colourName(spr.colors.c2), m = spr.meta || {}, bits = `${spr.bits}-bit`;
+  if (spr.kind === 'creature') { const feats = [EARS[m.ears], m.eyes === 1 ? 'one eye' : 'two eyes', m.fangs ? 'fangs' : null, m.tail ? 'a tail' : null].filter((x) => x && x !== 'no ears');
+    return `${a(body)} ${body} ${bits} creature with ${feats.join(', ').replace(/, ([^,]*)$/, ' and $1')}.`; }
+  if (spr.kind === 'hero') return `${a(body)} ${body} ${bits} hero with ${HAIR[m.hair]}, carrying ${WEAPON[m.weapon]}${m.cape ? ', wearing a cape' : ''}.`;
+  if (spr.kind === 'item') { const c = colourName(spr.colors[m.t === 0 ? 'wh' : m.t === 3 || m.t === 4 ? 'a2' : 'c2']); return `${a(c)} ${c} ${bits} ${ITEM[m.t]}.`; }
+  const n = { all: spr.d.length, water: 0, snow: 0, rock: 0, forest: 0 };
+  for (const v of spr.d) { if (v === R.wd || v === R.wl) n.water++; else if (v === R.sn) n.snow++; else if (v === R.rk) n.rock++; else if (v === R.fo) n.forest++; }
+  const land = Math.round((1 - n.water / n.all) * 100);
+  return `${spr.bits === 8 ? 'An' : 'A'} ${bits} island seen from above, about ${land}% land with sandy coast, grass${n.forest ? ', forest' : ''}${n.rock ? ', rock' : ''}${n.snow ? ' and a snowy peak' : ''}.`;
+}
+
 /** Generate a sprite. Returns { w, h, d (role indices), colors, id, usedColours }. */
 export function generate({ kind = 'creature', bits = 8, palette, seed = 'shadw' } = {}) {
   palette = palette || (bits === 8 ? 'nes' : 'snes');
@@ -272,7 +296,9 @@ export function generate({ kind = 'creature', bits = 8, palette, seed = 'shadw' 
   const colors = makePalette(palette, bits, rng(`${palette}|${seed}`));
   const g = MAKERS[kind](rand, bits);
   const used = new Set(); for (const v of g.d) if (v) used.add(toHex(colors[ROLES[v]]));
-  return { kind, bits, palette, seed: String(seed), w: g.w, h: g.h, d: g.d, colors, usedColours: [...used] };
+  const spr = { kind, bits, palette, seed: String(seed), w: g.w, h: g.h, d: g.d, colors, usedColours: [...used], meta: g.meta };
+  spr.alt = describe(spr);
+  return spr;
 }
 
 /** RGBA bytes at integer scale. */
@@ -300,7 +326,7 @@ export function packSheet(sprites, { columns = 4, scale = 1, pad = 1 } = {}) {
   sprites.forEach((s, i) => {
     const cx = (i % columns) * cw + pad, cy = Math.floor(i / columns) * ch + pad, img = toRGBA(s, scale);
     for (let y = 0; y < img.h; y++) for (let x = 0; x < img.w; x++) { const a = (y * img.w + x) * 4, b = ((cy + y) * W + cx + x) * 4; for (let k = 0; k < 4; k++) data[b + k] = img.data[a + k]; }
-    frames.push({ name: `${s.kind}-${s.seed}`, x: cx, y: cy, w: img.w, h: img.h, kind: s.kind, bits: s.bits, palette: s.palette, seed: s.seed, colours: s.usedColours.length });
+    frames.push({ name: `${s.kind}-${s.seed}`, alt: s.alt, x: cx, y: cy, w: img.w, h: img.h, kind: s.kind, bits: s.bits, palette: s.palette, seed: s.seed, colours: s.usedColours.length });
   });
   return { w: W, h: H, data, atlas: { format: 'shadw-pixelgen-atlas/1', image: 'sheet.png', size: { w: W, h: H }, scale, frames } };
 }

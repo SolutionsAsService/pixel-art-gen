@@ -27,9 +27,9 @@
 <p class="lede">PIXELGEN is the stack's placeholder-art and prototyping tool. It has no dependencies and no server, so it runs in a browser, in a build script or in CI.</p>
 <h2>Use it from a build</h2>
 <pre><code>node _src/render.mjs --kind hero --bits 16 --palette snes --seed ember-3 --scale 8 --out hero.png</code></pre>
-<p>Prints one line of JSON, including a pixel fingerprint. Run it twice and the fingerprint matches. For the hero above it prints <code>68416de5</code>, and the Studio shows the same pixels for <code>hero · 16-bit · SNES · ember-3</code>.</p>
+<p>Prints one line of JSON, including a fingerprint: a short code that proves two images are identical. Run it twice and the fingerprint matches. For the hero above it prints <code>68416de5</code>, and the Studio shows the same pixels for <code>hero · 16-bit · SNES · ember-3</code>.</p>
 <h2>Atlas format</h2>
-<p>A sheet downloads as <code>sheet.png</code> plus <code>sheet.json</code>. Frames are in pixels and every frame names the seed that makes it again.</p>
+<p>An atlas is one picture plus a map of where each sprite sits. A sheet downloads as <code>sheet.png</code> plus <code>sheet.json</code>. Frames are in pixels, each has a short text description in <code>alt</code>, and each names the seed that makes it again.</p>
 <pre><code>{
   "format": "shadw-pixelgen-atlas/1",
   "image": "sheet.png",
@@ -41,6 +41,7 @@
   "frames": [
     {
       "name": "hero-ember-3",
+      "alt": "A dark blue 16-bit hero with a cap of hair, carrying a staff.",
       "x": 1,
       "y": 1,
       "w": 32,
@@ -53,6 +54,7 @@
     },
     {
       "name": "creature-ash-1",
+      "alt": "A blue 8-bit creature with antennae, two eyes and a tail.",
       "x": 35,
       "y": 1,
       "w": 16,

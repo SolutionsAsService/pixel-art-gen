@@ -2,7 +2,7 @@
 import { mkdirSync, writeFileSync, copyFileSync, readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { generate, toRGBA, packSheet, fingerprint, KINDS, PALETTES, paletteColourCount, ROLES, toHex } from './pixelgen.mjs';
+import { generate, toRGBA, packSheet, fingerprint, KINDS, PALETTES, paletteColourCount, ROLES, toHex, colourName } from './pixelgen.mjs';
 import { encodePNG } from './png.mjs';
 import { TOKENS, ZONES, wash, measure } from './tokens.mjs';
 
@@ -31,6 +31,7 @@ function svgRGBA(img, label) {
       if (!by.has(k)) by.set(k, []); by.get(k).push(`M${x} ${y}h${e - x}v1h-${e - x}z`); x = e; } }
   return `<svg class="px" viewBox="0 0 ${img.w} ${img.h}" shape-rendering="crispEdges" role="img" aria-label="${label}">${[...by].map(([c, d]) => `<path fill="${c}" d="${d.join('')}"/>`).join('')}</svg>`;
 }
+const hexRGB = (s) => [1, 3, 5].map((i) => parseInt(s.slice(i, i + 2), 16));
 const sp = (kind, bits, seed, palette) => generate({ kind, bits, seed, palette });
 
 // 5x7 bitmap wordmark
@@ -106,18 +107,18 @@ pages.index = page({ file: 'index', zone: 'studio', title: 'PIXELGEN: 8-bit and 
 <div class="hero-mark">${WM}</div>
 <p class="lede">Creatures, heroes, items and islands in the colour limits of real consoles. Same seed, same pixels, every time.</p>
 <ul class="poster" aria-label="What PIXELGEN holds">
-<li class="tile" data-z="studio"><a href="/studio?kind=hero&amp;bits=16&amp;seed=ember-3"><span class="art">${svg(tHero, { label: 'A 32 by 32 pixel hero in SNES colours' })}</span>
+<li class="tile" data-z="studio"><a href="/studio?kind=hero&amp;bits=16&amp;seed=ember-3"><span class="art">${svg(tHero, { label: tHero.alt })}</span>
 <span class="name">Studio</span><span class="fig">${kindsN} kinds, 8 or 16 bit</span><span class="go">Make one</span></a></li>
 <li class="tile" data-z="palettes"><a href="/palettes"><span class="art pal">${tPal.map((id) => `<span class="prow"><b>${PALETTES[id].label}</b>${swatchStrip(id)}</span>`).join('')}</span>
 <span class="name">Palettes</span><span class="fig">${palN} palettes, NES ${nesCount} listed colours</span><span class="go">See the limits</span></a></li>
-<li class="tile" data-z="sheets"><a href="/sheets"><span class="art">${svgRGBA(tSheet, 'A sprite sheet of four sprites')}</span>
+<li class="tile" data-z="sheets"><a href="/sheets"><span class="art">${svgRGBA(tSheet, 'A sprite sheet of four sprites: two 8-bit and two 16-bit creatures and items')}</span>
 <span class="name">Sheets</span><span class="fig">PNG atlas plus JSON frames</span><span class="go">Build a sheet</span></a></li>
-<li class="tile" data-z="stack"><a href="/stack"><span class="art">${svg(tIsle, { label: 'A 64 by 64 pixel island' })}</span>
+<li class="tile" data-z="stack"><a href="/stack"><span class="art">${svg(tIsle, { label: tIsle.alt })}</span>
 <span class="name">Stack</span><span class="fig">Atlas and command line for the SHADW stack</span><span class="go">See the fit</span></a></li>
 </ul></div></section>
 <section class="wrap band"><h2>Why it looks right</h2>
 <ul class="cols">
-<li><h3>Real limits</h3><p>8-bit creatures, heroes and items are three colours and clear, the NES rule (Game Boy: its four greens). 16-bit sprites sit inside the ${snes.toLocaleString('en')}-colour SNES and ${md}-colour Mega Drive gamuts and use at most ten colours, under the limit of 15. Colour is exact; sprite sizes, scanlines and tiles are not simulated.</p></li>
+<li><h3>Real limits</h3><p>8-bit creatures, heroes and items are three colours and transparent, the NES rule (Game Boy: its four greens). 16-bit sprites sit inside the ${snes.toLocaleString('en')}-colour SNES and ${md}-colour Mega Drive colour sets and use at most ten colours, under the limit of 15. Colour is exact; sprite sizes, scanlines and tiles are not simulated.</p></li>
 <li><h3>Hand-made habits</h3><p>Dark outline, rim light top left, shade bottom right, and shadows that drift cool while lights drift warm. Islands dither between bands on 16-bit and band flat on 8-bit.</p></li>
 <li><h3>Seeded</h3><p>A seed, a kind, a depth and a palette name one sprite for good. The browser and the command line draw identical pixels.</p></li>
 </ul></section>`, script: false });
@@ -140,6 +141,7 @@ pages.studio = page({ file: 'studio', zone: 'studio', title: 'Studio · PIXELGEN
 </form>
 <div class="stage">
 <div class="frame"><canvas id="preview" width="16" height="16" role="img" aria-label="Generated sprite"></canvas></div>
+<p id="desc" class="desc"></p>
 <p id="readout" class="readout" aria-live="polite"></p>
 <ul id="swatches" class="swatches" aria-label="Colours used"></ul>
 <div class="actions">
@@ -157,8 +159,9 @@ pages.studio = page({ file: 'studio', zone: 'studio', title: 'Studio · PIXELGEN
 
 // Palettes
 const pcard = (id) => { const p = PALETTES[id]; const bits = p.bits; const s = demo('hero', bits, 'ember-3', id);
-  const sw = p.all ? `<ul class="sw">${p.all.map((c) => `<li style="background:${c}"><span class="sr">${c}</span></li>`).join('')}</ul>` : `<p class="ramp" aria-hidden="true">${Array.from({ length: 2 ** p.depth }, (_, i) => { const v = Math.round(i * 255 / (2 ** p.depth - 1)); return `<i style="background:rgb(${v},${v},${v})"></i>`; }).join('')}</p><p class="cap">${p.depth} bits per channel: ${2 ** p.depth} levels each, so ${((2 ** p.depth) ** 3).toLocaleString('en')} colours.</p>`;
-  return `<li class="pcard"><div class="pc-art">${svg(s, { label: `A hero drawn in ${p.label}` })}</div><div><h3>${p.label} <small>${bits}-bit</small></h3>
+  const swList = p.all ? `<ul class="sw">${p.all.map((c) => `<li style="background:${c}"><span class="sr">${colourName(hexRGB(c))} ${c}</span></li>`).join('')}</ul>` : '';
+  const sw = p.all ? (p.all.length > 16 ? `<details><summary>Show all ${p.all.length} colours</summary>${swList}</details>` : swList) : `<p class="ramp" aria-hidden="true">${Array.from({ length: 2 ** p.depth }, (_, i) => { const v = Math.round(i * 255 / (2 ** p.depth - 1)); return `<i style="background:rgb(${v},${v},${v})"></i>`; }).join('')}</p><p class="cap">${p.depth} bits per channel: ${2 ** p.depth} levels each, so ${((2 ** p.depth) ** 3).toLocaleString('en')} colours.</p>`;
+  return `<li class="pcard"><div class="pc-art">${svg(s, { label: `Sample in ${p.label} colours. ${s.alt}` })}</div><div><h3>${p.label} <small>${bits}-bit</small></h3>
 <p>${paletteColourCount(id).toLocaleString('en')} colours. ${p.note}.</p>${sw}</div></li>`; };
 pages.palettes = page({ file: 'palettes', zone: 'palettes', title: 'Palettes · PIXELGEN', desc: `${palN} palettes with the colour limits of the real hardware: NES, Game Boy, C64, SNES, Mega Drive and PICO-8.`,
   body: `<div class="wrap"><h1>Palettes</h1>
@@ -166,7 +169,7 @@ pages.palettes = page({ file: 'palettes', zone: 'palettes', title: 'Palettes · 
 <h2>8-bit</h2><ul class="pcards">${['nes', 'gb', 'c64'].map(pcard).join('')}</ul>
 <h2>16-bit</h2><ul class="pcards">${['snes', 'genesis', 'pico'].map(pcard).join('')}</ul>
 <h2>How the limits are kept</h2>
-<ul class="cols"><li><h3>8-bit sprites</h3><p>Creatures, heroes and items: one outline, one body colour and one light, so three colours and clear. NES and C64 entries are real palette entries; Game Boy uses its four greens. Islands are backgrounds, not sprites: four to seven colours on NES and C64.</p></li>
+<ul class="cols"><li><h3>8-bit sprites</h3><p>Creatures, heroes and items: one outline, one body colour and one light, so three colours and transparent. NES and C64 entries are real palette entries; Game Boy uses its four greens. Islands are backgrounds, not sprites: four to seven colours on NES and C64.</p></li>
 <li><h3>16-bit colour depth</h3><p>SNES colours are rounded to 5 bits per channel and Mega Drive colours to 3 bits, the depth of those machines' colour registers. PICO-8 snaps to its fixed 16.</p></li>
 <li><h3>Not claimed</h3><p>Sprite size, scanline and tile limits of the real consoles are not enforced. The palettes are exact; the hardware around them is not simulated.</p></li></ul></div>` });
 
@@ -199,9 +202,9 @@ pages.stack = page({ file: 'stack', zone: 'stack', title: 'Stack · PIXELGEN', d
 <p class="lede">PIXELGEN is the stack's placeholder-art and prototyping tool. It has no dependencies and no server, so it runs in a browser, in a build script or in CI.</p>
 <h2>Use it from a build</h2>
 <pre><code>${cli}</code></pre>
-<p>Prints one line of JSON, including a pixel fingerprint. Run it twice and the fingerprint matches. For the hero above it prints <code>${fp(demo('hero', 16, 'ember-3', 'snes'))}</code>, and the Studio shows the same pixels for <code>hero · 16-bit · SNES · ember-3</code>.</p>
+<p>Prints one line of JSON, including a fingerprint: a short code that proves two images are identical. Run it twice and the fingerprint matches. For the hero above it prints <code>${fp(demo('hero', 16, 'ember-3', 'snes'))}</code>, and the Studio shows the same pixels for <code>hero · 16-bit · SNES · ember-3</code>.</p>
 <h2>Atlas format</h2>
-<p>A sheet downloads as <code>sheet.png</code> plus <code>sheet.json</code>. Frames are in pixels and every frame names the seed that makes it again.</p>
+<p>An atlas is one picture plus a map of where each sprite sits. A sheet downloads as <code>sheet.png</code> plus <code>sheet.json</code>. Frames are in pixels, each has a short text description in <code>alt</code>, and each names the seed that makes it again.</p>
 <pre><code>${JSON.stringify(atlasDemo, null, 2).replace(/</g, '&lt;')}</code></pre>
 <h2>Where it fits</h2>
 <ul class="fits">

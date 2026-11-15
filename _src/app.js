@@ -1,4 +1,4 @@
-import { generate, toRGBA, packSheet, KINDS, PALETTES, paletteColourCount } from './pixelgen.js';
+import { generate, toRGBA, packSheet, colourName, KINDS, PALETTES, paletteColourCount } from './pixelgen.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const page = document.body.dataset.page;
@@ -30,30 +30,34 @@ if (page === 'studio') {
   const st = { kind: KINDS[q.get('kind')] ? q.get('kind') : 'creature', bits: q.get('bits') === '16' ? 16 : 8, palette: q.get('palette') || '', seed: (q.get('seed') || 'ember').slice(0, 40) };
   const form = $('#controls'), pal = $('#palette'), seed = $('#seed'), main = $('#preview'), status = $('#status');
   const say = (t) => { status.textContent = t; };
-  const render = (updateUrl = true) => {
+  let vbase = null;
+  const render = (updateUrl = true, keepVariants = false) => {
     fillPalettes(pal, st.bits, pal.value || st.palette); st.palette = pal.value;
     form.elements.kind.value = st.kind; form.elements.bits.value = String(st.bits); seed.value = st.seed;
     const spr = generate(st); draw(main, spr, Math.min(384, $('.frame').clientWidth - 24));
-    main.setAttribute('aria-label', `${KINDS[st.kind].label}, ${st.bits}-bit ${PALETTES[st.palette].label}, seed ${st.seed}`);
-    const limit = st.kind === 'island' ? '. An island is a background, so it is not held to the sprite limit' : st.bits === 8 ? `, limit ${st.palette === 'gb' ? 4 : 3} plus clear` : ', limit 15 plus clear';
+    main.setAttribute('aria-label', `${spr.alt} ${PALETTES[st.palette].label} palette, seed ${st.seed}.`); $('#desc').textContent = spr.alt;
+    const limit = st.kind === 'island' ? '. An island is a background, so it is not held to the sprite limit' : st.bits === 8 ? `, limit ${st.palette === 'gb' ? 4 : 3} plus transparent` : ', limit 15 plus transparent';
     $('#readout').textContent = `${spr.w} by ${spr.h} pixels, ${spr.usedColours.length} colours used${limit}.`;
-    $('#swatches').innerHTML = spr.usedColours.map((c) => `<li><i style="background:${c}"></i><code>${c}</code></li>`).join('');
-    const grid = $('#variants'); grid.innerHTML = '';
-    const seedsRand = (() => { let h = 0; for (const ch of st.seed + '#v') h = (h * 31 + ch.charCodeAt(0)) >>> 0; let a = h; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; })();
+    $('#swatches').innerHTML = spr.usedColours.map((c) => { const n = colourName([1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16))); return `<li><i style="background:${c}"></i><span>${n}</span> <code>${c}</code></li>`; }).join('');
+    const grid = $('#variants');
+    if (keepVariants && grid.children.length) { for (const b of grid.querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.seed === st.seed)); if (updateUrl) url(); return; }
+    grid.innerHTML = ''; vbase = st.seed;
+    const seedsRand = (() => { let h = 0; for (const ch of vbase + '#v') h = (h * 31 + ch.charCodeAt(0)) >>> 0; let a = h; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; })();
     for (let i = 0; i < 12; i++) {
       const s = code(seedsRand), v = generate({ ...st, seed: s }), li = document.createElement('li'), b = document.createElement('button'), c = document.createElement('canvas');
-      b.type = 'button'; b.setAttribute('aria-label', `Use seed ${s}`); draw(c, v, 88); b.append(c, Object.assign(document.createElement('span'), { textContent: s })); b.onclick = () => { st.seed = s; render(); main.scrollIntoView({ block: 'nearest' }); say(`Seed ${s} selected.`); };
+      b.type = 'button'; b.dataset.seed = s; b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', `Use seed ${s}: ${v.alt}`); draw(c, v, 88); b.append(c, Object.assign(document.createElement('span'), { textContent: s })); b.onclick = () => { st.seed = s; render(true, true); main.scrollIntoView({ block: 'nearest' }); say(`Seed ${s} selected. ${generate({ ...st, seed: s }).alt}`); };
       li.append(b); grid.append(li);
     }
-    if (updateUrl) { const u = new URLSearchParams({ kind: st.kind, bits: st.bits, palette: st.palette, seed: st.seed }); history.replaceState(null, '', `?${u}`); }
+    if (updateUrl) url();
   };
+  const url = () => { const u = new URLSearchParams({ kind: st.kind, bits: st.bits, palette: st.palette, seed: st.seed }); history.replaceState(null, '', `?${u}`); };
   form.addEventListener('change', (e) => {
     if (e.target.name === 'kind') st.kind = e.target.value;
     if (e.target.name === 'bits') { st.bits = +e.target.value; pal.value = ''; }
     if (e.target.id === 'palette') st.palette = pal.value;
     render();
   });
-  seed.addEventListener('input', () => { st.seed = seed.value.trim() || 'ember'; render(); });
+  let deb; seed.addEventListener('input', () => { st.seed = seed.value.trim() || 'ember'; clearTimeout(deb); deb = setTimeout(() => render(), 250); });
   $('#reroll').onclick = () => { st.seed = code(rnd); render(); say(`Seed ${st.seed}.`); };
   $('#dl').onclick = () => { const k = +$('#scale').value; png(toRGBA(generate(st), k), `${st.kind}-${st.bits}bit-${st.palette}-${st.seed}-x${k}.png`); say('PNG downloaded.'); };
   $('#copy').onclick = async () => { try { await navigator.clipboard.writeText(location.href); say('Link copied.'); } catch { say('Copy failed. The address bar holds the link.'); } };

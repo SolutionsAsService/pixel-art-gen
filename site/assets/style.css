@@ -131,3 +131,11 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;max-width:100%;disp
 .foot p{margin:0 0 8px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.tile:hover{transform:none}}
 @media (forced-colors:active){.chip input:checked+span{outline:3px solid Highlight}}
+
+.chip input:checked+span::before{content:"\2713\00a0"}
+.desc{margin:10px 0 0;font-size:15px;min-height:1.5em}
+details{margin:6px 0}
+summary{display:flex;align-items:center;min-height:44px;cursor:pointer;font-weight:700;font-size:15px}
+summary:focus-visible{outline:3px solid var(--signal);outline-offset:3px}
+.swatches span{font-size:13px}
+.variants button[aria-pressed=true]{border-color:var(--signal);box-shadow:4px 4px 0 var(--signal)}
