@@ -45,7 +45,7 @@ pre code{background:none;padding:0}
 .wordmark{display:block;width:100%;max-width:760px;height:auto}
 .slab .lede{margin:0 0 18px;color:#F8F8F8}
 .poster{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-@media (min-width:860px){.poster{grid-template-columns:repeat(4,1fr);gap:16px}}
+@media (min-width:860px){.poster{grid-template-columns:1.45fr 1fr 1fr 1fr;gap:16px}.tile[data-z=studio] .art{aspect-ratio:1}.tile:not([data-z=studio]) .art{aspect-ratio:1}}
 .tile{--c:var(--studio-slab);border:4px solid var(--c);box-shadow:6px 6px 0 var(--c);background:#0E0E24;min-width:0}
 .tile[data-z=palettes]{--c:var(--palettes-slab)}.tile[data-z=sheets]{--c:var(--sheets-slab)}.tile[data-z=stack]{--c:var(--stack-slab)}
 .tile a{display:flex;flex-direction:column;gap:2px;height:100%;padding:10px 10px 12px;text-decoration:none}
