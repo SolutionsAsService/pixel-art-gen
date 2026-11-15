@@ -43,4 +43,26 @@ export function measure() {
   add('slab ink', contrast(TOKENS.dark.ink, TOKENS.dark.slab), 7, 'slab');
   return { rows, failures };
 }
-if (process.argv[1] && process.argv[1].endsWith('tokens.mjs')) { const m = measure(); for (const r of m.rows) console.log(r.ok ? 'ok  ' : 'FAIL', r.mode, r.what, r.value, `(min ${r.min})`); process.exit(m.failures.length ? 1 : 0); }
+if (process.argv[1] && process.argv[1].endsWith('tokens.mjs') && !process.argv.includes('--cvd')) { const m = measure(); for (const r of m.rows) console.log(r.ok ? 'ok  ' : 'FAIL', r.mode, r.what, r.value, `(min ${r.min})`); process.exit(m.failures.length ? 1 : 0); }
+
+// Informational: pairwise distance between the category hues and the signal as seen with each colour-vision deficiency
+// (Machado et al. 2009, severity 1.0, applied in linear RGB). Meaning never rests on hue alone on this site, so this is a
+// report, not a gate: `node _src/tokens.mjs --cvd`.
+const CVD = { protan: [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]],
+  deutan: [[0.367322, 0.860646, -0.227968], [0.280085, 0.672501, 0.047413], [-0.011820, 0.042940, 0.968881]],
+  tritan: [[1.255528, -0.076749, -0.178779], [-0.078411, 0.930809, 0.147602], [0.004733, 0.691367, 0.303900]] };
+const toLin = (c) => c.map((v) => lin(v)), fromLin = (v) => Math.round(255 * (v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055));
+export function simulate(hex, kind) {
+  const l = toLin(h2(hex)), m = CVD[kind];
+  return '#' + m.map((row) => Math.min(255, Math.max(0, fromLin(Math.max(0, Math.min(1, row[0] * l[0] + row[1] * l[1] + row[2] * l[2]))))).toString(16).padStart(2, '0')).join('');
+}
+export function cvdReport() {
+  const out = [];
+  for (const mode of ['dark', 'light']) for (const kind of Object.keys(CVD)) {
+    const t = TOKENS[mode], names = [...ZONES, 'signal'], col = (n) => simulate(n === 'signal' ? t.signal : t.hue[n], kind);
+    let worst = [Infinity, '']; for (let i = 0; i < names.length; i++) for (let j = i + 1; j < names.length; j++) { const d = deltaE(col(names[i]), col(names[j])); if (d < worst[0]) worst = [d, `${names[i]}-${names[j]}`]; }
+    out.push({ mode, kind, worst: +worst[0].toFixed(1), pair: worst[1] });
+  }
+  return out;
+}
+if (process.argv.includes('--cvd')) for (const r of cvdReport()) console.log(r.mode, r.kind, 'worst pair', r.pair, r.worst);
