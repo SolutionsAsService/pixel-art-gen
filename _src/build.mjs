@@ -71,7 +71,7 @@ const page = ({ file, zone, title, desc, body, script }) => `<!doctype html>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top"><div class="wrap bar">
 <a class="brand" href="/" aria-label="PIXELGEN, home">${wordmark('PIXELGEN', [H.studio, H.stack, H.palettes, H.sheets, H.studio, H.stack, H.palettes, H.sheets], 'brandmark')}</a>
-<nav aria-label="Main"><ul>${NAV.map(([z, t]) => `<li><a data-z="${z}" href="/${z}"${z === zone ? ' aria-current="page"' : ''}>${t}</a></li>`).join('')}</ul></nav>
+<nav aria-label="Main"><ul>${NAV.map(([z, t]) => `<li><a data-z="${z}" href="/${z}"${z === file ? ' aria-current="page"' : ''}>${t}</a></li>`).join('')}</ul></nav>
 </div></header>
 <main id="main">
 ${body}
@@ -95,7 +95,7 @@ const fp = (s) => fingerprint(s);
 const pages = {};
 
 // Landing: one composed poster, one tile per page, baked SVG
-const tHero = demo('hero', 16, 'ember-3', 'snes'), tPal = ['nes', 'gb', 'c64', 'snes', 'genesis', 'pico'];
+const tHero = demo('hero', 16, 'ember-3', 'snes'), tPal = ['nes', 'c64', 'pico', 'gb'];
 const tSheet = packSheet([demo('creature', 8, 'ash-1', 'nes'), demo('item', 8, 'ash-2', 'nes'), demo('creature', 16, 'ash-3', 'snes'), demo('item', 16, 'ash-4', 'snes')], { columns: 2 });
 const tIsle = demo('island', 16, 'tide-9', 'snes');
 const swatchStrip = (id) => { const p = PALETTES[id]; const all = p.all ? p.all.slice(0, 16) : null; return all ? `<span class="strip" aria-hidden="true">${all.map((c) => `<i style="background:${c}"></i>`).join('')}</span>` : ''; };
@@ -109,15 +109,15 @@ pages.index = page({ file: 'index', zone: 'studio', title: 'PIXELGEN: 8-bit and 
 <li class="tile" data-z="studio"><a href="/studio?kind=hero&amp;bits=16&amp;seed=ember-3"><span class="art">${svg(tHero, { label: 'A 32 by 32 pixel hero in SNES colours' })}</span>
 <span class="name">Studio</span><span class="fig">${kindsN} kinds, 8 or 16 bit</span><span class="go">Make one</span></a></li>
 <li class="tile" data-z="palettes"><a href="/palettes"><span class="art pal">${tPal.map((id) => `<span class="prow"><b>${PALETTES[id].label}</b>${swatchStrip(id)}</span>`).join('')}</span>
-<span class="name">Palettes</span><span class="fig">${palN} palettes, NES ${nesCount} colours</span><span class="go">See the limits</span></a></li>
+<span class="name">Palettes</span><span class="fig">${palN} palettes, NES ${nesCount} listed colours</span><span class="go">See the limits</span></a></li>
 <li class="tile" data-z="sheets"><a href="/sheets"><span class="art">${svgRGBA(tSheet, 'A sprite sheet of four sprites')}</span>
 <span class="name">Sheets</span><span class="fig">PNG atlas plus JSON frames</span><span class="go">Build a sheet</span></a></li>
 <li class="tile" data-z="stack"><a href="/stack"><span class="art">${svg(tIsle, { label: 'A 64 by 64 pixel island' })}</span>
-<span class="name">Stack</span><span class="fig">Fits the SHADW game stack</span><span class="go">Wire it in</span></a></li>
+<span class="name">Stack</span><span class="fig">Atlas and command line for the SHADW stack</span><span class="go">See the fit</span></a></li>
 </ul></div></section>
 <section class="wrap band"><h2>Why it looks right</h2>
 <ul class="cols">
-<li><h3>Real limits</h3><p>8-bit sprites are three colours and clear, the NES rule. 16-bit sprites sit under the ${snes.toLocaleString('en')}-colour SNES and ${md}-colour Mega Drive gamuts, with 15 colours and clear per sprite.</p></li>
+<li><h3>Real limits</h3><p>8-bit creatures, heroes and items are three colours and clear, the NES rule (Game Boy: its four greens). 16-bit sprites sit inside the ${snes.toLocaleString('en')}-colour SNES and ${md}-colour Mega Drive gamuts and use at most ten colours, under the limit of 15. Colour is exact; sprite sizes, scanlines and tiles are not simulated.</p></li>
 <li><h3>Hand-made habits</h3><p>Dark outline, rim light top left, shade bottom right, and shadows that drift cool while lights drift warm. Islands dither between bands on 16-bit and band flat on 8-bit.</p></li>
 <li><h3>Seeded</h3><p>A seed, a kind, a depth and a palette name one sprite for good. The browser and the command line draw identical pixels.</p></li>
 </ul></section>`, script: false });
@@ -143,7 +143,7 @@ pages.studio = page({ file: 'studio', zone: 'studio', title: 'Studio · PIXELGEN
 <p id="readout" class="readout" aria-live="polite"></p>
 <ul id="swatches" class="swatches" aria-label="Colours used"></ul>
 <div class="actions">
-<label class="field small">Download scale<select id="scale"><option>1</option><option>4</option><option selected>8</option><option>16</option></select></label>
+<label class="field small">Download size<select id="scale"><option value="1">1x</option><option value="4">4x</option><option value="8" selected>8x</option><option value="16">16x</option></select></label>
 <button type="button" id="dl" class="btn">Download PNG</button>
 <button type="button" id="copy" class="btn">Copy link</button>
 <button type="button" id="add" class="btn">Add to sheet</button></div>
@@ -151,6 +151,7 @@ pages.studio = page({ file: 'studio', zone: 'studio', title: 'Studio · PIXELGEN
 <noscript><p class="status">The generator needs JavaScript. The pictures on the other pages do not.</p></noscript>
 </div></div>
 <h2>Twelve more</h2>
+<p class="hint">Tap a sprite to make its seed the current one.</p>
 <ol id="variants" class="variants" aria-label="Variants of this seed"></ol>
 </div>`, script: true });
 
@@ -165,7 +166,7 @@ pages.palettes = page({ file: 'palettes', zone: 'palettes', title: 'Palettes · 
 <h2>8-bit</h2><ul class="pcards">${['nes', 'gb', 'c64'].map(pcard).join('')}</ul>
 <h2>16-bit</h2><ul class="pcards">${['snes', 'genesis', 'pico'].map(pcard).join('')}</ul>
 <h2>How the limits are kept</h2>
-<ul class="cols"><li><h3>8-bit sprites</h3><p>One outline colour, one body colour and one light: three colours and clear. NES and C64 columns are real palette entries; Game Boy uses its four greens.</p></li>
+<ul class="cols"><li><h3>8-bit sprites</h3><p>Creatures, heroes and items: one outline, one body colour and one light, so three colours and clear. NES and C64 entries are real palette entries; Game Boy uses its four greens. Islands are backgrounds, not sprites: four to seven colours on NES and C64.</p></li>
 <li><h3>16-bit colour depth</h3><p>SNES colours are rounded to 5 bits per channel and Mega Drive colours to 3 bits, the depth of those machines' colour registers. PICO-8 snaps to its fixed 16.</p></li>
 <li><h3>Not claimed</h3><p>Sprite size, scanline and tile limits of the real consoles are not enforced. The palettes are exact; the hardware around them is not simulated.</p></li></ul></div>` });
 
@@ -185,7 +186,7 @@ pages.sheets = page({ file: 'sheets', zone: 'sheets', title: 'Sheets · PIXELGEN
 <button type="button" id="s-clear" class="btn">Clear picks</button></div></form>
 <div class="frame sheetframe"><canvas id="sheet" width="16" height="16" role="img" aria-label="Sprite sheet preview"></canvas></div>
 <p id="s-readout" class="readout" aria-live="polite"></p>
-<div class="actions"><label class="field small">PNG scale<select id="s-scale"><option>1</option><option>2</option><option selected>4</option><option>8</option></select></label>
+<div class="actions"><label class="field small">PNG size<select id="s-scale"><option value="1">1x</option><option value="2">2x</option><option value="4" selected>4x</option><option value="8">8x</option></select></label>
 <button type="button" id="s-png" class="btn">Download sheet.png</button><button type="button" id="s-json" class="btn">Download sheet.json</button></div>
 <p id="s-status" class="status" role="status"></p>
 <noscript><p class="status">Sheets need JavaScript.</p></noscript></div>`, script: true });
@@ -207,7 +208,7 @@ pages.stack = page({ file: 'stack', zone: 'stack', title: 'Stack · PIXELGEN', d
 <li data-z="stack"><h3><a href="https://github.com/PrometheusIntelligence/shadw-terrain">SHADW Terrain</a></h3><p>Islands are small height-banded maps with a coast. A fit for test overworlds and thumbnails. Not wired in yet.</p></li>
 <li data-z="stack"><h3><a href="https://github.com/PrometheusIntelligence/shadw-game-store">SHADW Game Store</a></h3><p>Store art for a game that has none yet: capsule icons and placeholder screenshots. Not wired in yet.</p></li>
 <li data-z="stack"><h3><a href="https://github.com/SolutionsAsService/shadw-modding">SHADW Modding</a></h3><p>An art pack for a mod: a sheet, an atlas and the seeds that rebuild it. Not wired in yet.</p></li>
-<li data-z="stack"><h3><a href="https://github.com/SolutionsAsService/shadw-gaming-master">Gaming master index</a></h3><p>Listed there as a tool, next to the modding and forge repos.</p></li></ul>
+<li data-z="stack"><h3><a href="https://github.com/SolutionsAsService/shadw-gaming-master">Gaming master index</a></h3><p>An index entry as a tool is proposed in that repository, pending merge to its main branch.</p></li></ul>
 <h2>Limits, stated</h2>
 <ul class="plain"><li>Sprites are 16 by 16 or 32 by 32 (islands 32 or 64). There is no animation yet.</li>
 <li>Palettes are exact; console sprite counts and tile rules are not simulated.</li>

@@ -35,7 +35,7 @@ if (page === 'studio') {
     form.elements.kind.value = st.kind; form.elements.bits.value = String(st.bits); seed.value = st.seed;
     const spr = generate(st); draw(main, spr, Math.min(384, $('.frame').clientWidth - 24));
     main.setAttribute('aria-label', `${KINDS[st.kind].label}, ${st.bits}-bit ${PALETTES[st.palette].label}, seed ${st.seed}`);
-    const limit = st.bits === 8 && st.palette !== 'gb' ? ', limit 3' : st.bits === 8 ? ', limit 4' : ', limit 15';
+    const limit = st.kind === 'island' ? '. An island is a background, so it is not held to the sprite limit' : st.bits === 8 ? `, limit ${st.palette === 'gb' ? 4 : 3} plus clear` : ', limit 15 plus clear';
     $('#readout').textContent = `${spr.w} by ${spr.h} pixels, ${spr.usedColours.length} colours used${limit}.`;
     $('#swatches').innerHTML = spr.usedColours.map((c) => `<li><i style="background:${c}"></i><code>${c}</code></li>`).join('');
     const grid = $('#variants'); grid.innerHTML = '';

@@ -56,11 +56,15 @@ pre code{background:none;padding:0}
 .tile .go{margin-top:6px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.05em;min-height:24px;display:flex;align-items:center}
 .tile .go::after{content:" >";white-space:pre}
 @media (hover:hover){.tile:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--c)}}
-.pal{flex-direction:column;align-items:stretch;justify-content:center;gap:10px;padding:10px;display:flex}
-.pal .prow{display:flex;flex-direction:column;gap:3px;font-size:12px}
+.tile .art.pal{flex-direction:column;align-items:stretch;justify-content:center;gap:10px;padding:10px;display:flex}
+.pal .prow{display:flex;flex-direction:column;gap:3px;font-size:12px;line-height:1.15}
 .pal b{font-weight:700;color:#F8F8F8;letter-spacing:.04em}
 .strip{display:flex;height:14px}.strip i{flex:1;display:block}
-@media (max-width:859px){.tile .art{aspect-ratio:4/3}.tile .go{display:none}.tile .fig{min-height:0}.tile a{padding-bottom:10px}}
+@media (max-width:859px){.tile .art{aspect-ratio:4/3}.tile .go{display:none}.tile[data-z=studio] .go{display:flex}.tile .fig{min-height:0}.tile a{padding-bottom:10px}.tile .art.pal{gap:5px;padding:6px;aspect-ratio:auto}.pal .prow{gap:2px}.pal .strip{height:9px}}
+.tile[data-z=studio] .go{background:var(--c);color:#07071A;padding:0 10px;min-height:32px;align-self:flex-start}
+.tile[data-z=studio] .go::after{content:" >"}
+@media (max-width:899px){.studio-grid .stage{display:contents}.studio-grid .frame{order:-2}.studio-grid .controls{order:-1}}
+.hint{margin:0 0 10px;font-size:15px}
 /* bands */
 .band{padding-bottom:32px}
 .cols{list-style:none;margin:0;padding:0;display:grid;gap:20px;grid-template-columns:1fr}
