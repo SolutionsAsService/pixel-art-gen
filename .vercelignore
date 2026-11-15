@@ -1,0 +1,7 @@
+/_src/
+/app.py
+/generator.py
+/templates/
+/__pycache__/
+/test/
+/CONTRIBUTING.md

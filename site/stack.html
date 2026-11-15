@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stack · PIXELGEN</title>
+<meta name="description" content="How PIXELGEN fits the SHADW game stack: a seeded, dependency-free sprite generator with a JSON atlas and a command line for build scripts.">
+<meta name="color-scheme" content="dark light">
+<link rel="canonical" href="https://pixel-art-gen.shadw.app/stack">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<meta property="og:type" content="website"><meta property="og:site_name" content="PIXELGEN">
+<meta property="og:title" content="Stack · PIXELGEN"><meta property="og:description" content="How PIXELGEN fits the SHADW game stack: a seeded, dependency-free sprite generator with a JSON atlas and a command line for build scripts.">
+<meta property="og:url" content="https://pixel-art-gen.shadw.app/stack">
+<meta property="og:image" content="https://pixel-art-gen.shadw.app/assets/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"PIXELGEN","applicationCategory":"DesignApplication","operatingSystem":"Any","url":"https://pixel-art-gen.shadw.app","description":"How PIXELGEN fits the SHADW game stack: a seeded, dependency-free sprite generator with a JSON atlas and a command line for build scripts.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT"}</script>
+</head>
+<body data-zone="stack" data-page="stack">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/" aria-label="PIXELGEN, home"><svg class="brandmark" viewBox="0 0 45 7" shape-rendering="crispEdges" role="img" aria-label="PIXELGEN"><path fill="#F85A30" d="M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM0 1h1v1h-1zM4 1h1v1h-1zM0 2h1v1h-1zM4 2h1v1h-1zM0 3h1v1h-1zM1 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM0 4h1v1h-1zM0 5h1v1h-1zM0 6h1v1h-1z"/><path fill="#F8B800" d="M6 0h1v1h-1zM7 0h1v1h-1zM8 0h1v1h-1zM7 1h1v1h-1zM7 2h1v1h-1zM7 3h1v1h-1zM7 4h1v1h-1zM7 5h1v1h-1zM6 6h1v1h-1zM7 6h1v1h-1zM8 6h1v1h-1z"/><path fill="#58D854" d="M10 0h1v1h-1zM14 0h1v1h-1zM10 1h1v1h-1zM14 1h1v1h-1zM11 2h1v1h-1zM13 2h1v1h-1zM12 3h1v1h-1zM11 4h1v1h-1zM13 4h1v1h-1zM10 5h1v1h-1zM14 5h1v1h-1zM10 6h1v1h-1zM14 6h1v1h-1z"/><path fill="#3CBCFC" d="M16 0h1v1h-1zM17 0h1v1h-1zM18 0h1v1h-1zM19 0h1v1h-1zM20 0h1v1h-1zM16 1h1v1h-1zM16 2h1v1h-1zM16 3h1v1h-1zM17 3h1v1h-1zM18 3h1v1h-1zM19 3h1v1h-1zM16 4h1v1h-1zM16 5h1v1h-1zM16 6h1v1h-1zM17 6h1v1h-1zM18 6h1v1h-1zM19 6h1v1h-1zM20 6h1v1h-1z"/><path fill="#F85A30" d="M22 0h1v1h-1zM22 1h1v1h-1zM22 2h1v1h-1zM22 3h1v1h-1zM22 4h1v1h-1zM22 5h1v1h-1zM22 6h1v1h-1zM23 6h1v1h-1zM24 6h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1z"/><path fill="#F8B800" d="M29 0h1v1h-1zM30 0h1v1h-1zM31 0h1v1h-1zM32 0h1v1h-1zM28 1h1v1h-1zM28 2h1v1h-1zM28 3h1v1h-1zM30 3h1v1h-1zM31 3h1v1h-1zM32 3h1v1h-1zM28 4h1v1h-1zM32 4h1v1h-1zM28 5h1v1h-1zM32 5h1v1h-1zM29 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1z"/><path fill="#58D854" d="M34 0h1v1h-1zM35 0h1v1h-1zM36 0h1v1h-1zM37 0h1v1h-1zM38 0h1v1h-1zM34 1h1v1h-1zM34 2h1v1h-1zM34 3h1v1h-1zM35 3h1v1h-1zM36 3h1v1h-1zM37 3h1v1h-1zM34 4h1v1h-1zM34 5h1v1h-1zM34 6h1v1h-1zM35 6h1v1h-1zM36 6h1v1h-1zM37 6h1v1h-1zM38 6h1v1h-1z"/><path fill="#3CBCFC" d="M40 0h1v1h-1zM44 0h1v1h-1zM40 1h1v1h-1zM41 1h1v1h-1zM44 1h1v1h-1zM40 2h1v1h-1zM42 2h1v1h-1zM44 2h1v1h-1zM40 3h1v1h-1zM43 3h1v1h-1zM44 3h1v1h-1zM40 4h1v1h-1zM44 4h1v1h-1zM40 5h1v1h-1zM44 5h1v1h-1zM40 6h1v1h-1zM44 6h1v1h-1z"/></svg></a>
+<nav aria-label="Main"><ul><li><a data-z="studio" href="/studio">Studio</a></li><li><a data-z="palettes" href="/palettes">Palettes</a></li><li><a data-z="sheets" href="/sheets">Sheets</a></li><li><a data-z="stack" href="/stack" aria-current="page">Stack</a></li></ul></nav>
+</div></header>
+<main id="main">
+<div class="wrap"><h1>Stack</h1>
+<p class="lede">PIXELGEN is the stack's placeholder-art and prototyping tool. It has no dependencies and no server, so it runs in a browser, in a build script or in CI.</p>
+<h2>Use it from a build</h2>
+<pre><code>node _src/render.mjs --kind hero --bits 16 --palette snes --seed ember-3 --scale 8 --out hero.png</code></pre>
+<p>Prints one line of JSON, including a pixel fingerprint. Run it twice and the fingerprint matches. For the hero above it prints <code>68416de5</code>, and the Studio shows the same pixels for <code>hero · 16-bit · SNES · ember-3</code>.</p>
+<h2>Atlas format</h2>
+<p>A sheet downloads as <code>sheet.png</code> plus <code>sheet.json</code>. Frames are in pixels and every frame names the seed that makes it again.</p>
+<pre><code>{
+  "format": "shadw-pixelgen-atlas/1",
+  "image": "sheet.png",
+  "size": {
+    "w": 68,
+    "h": 34
+  },
+  "scale": 1,
+  "frames": [
+    {
+      "name": "hero-ember-3",
+      "x": 1,
+      "y": 1,
+      "w": 32,
+      "h": 32,
+      "kind": "hero",
+      "bits": 16,
+      "palette": "snes",
+      "seed": "ember-3",
+      "colours": 10
+    },
+    {
+      "name": "creature-ash-1",
+      "x": 35,
+      "y": 1,
+      "w": 16,
+      "h": 16,
+      "kind": "creature",
+      "bits": 8,
+      "palette": "nes",
+      "seed": "ash-1",
+      "colours": 3
+    }
+  ]
+}</code></pre>
+<h2>Where it fits</h2>
+<ul class="fits">
+<li data-z="stack"><h3><a href="https://github.com/PrometheusIntelligence/shadw-terrain">SHADW Terrain</a></h3><p>Islands are small height-banded maps with a coast. A fit for test overworlds and thumbnails. Not wired in yet.</p></li>
+<li data-z="stack"><h3><a href="https://github.com/PrometheusIntelligence/shadw-game-store">SHADW Game Store</a></h3><p>Store art for a game that has none yet: capsule icons and placeholder screenshots. Not wired in yet.</p></li>
+<li data-z="stack"><h3><a href="https://github.com/SolutionsAsService/shadw-modding">SHADW Modding</a></h3><p>An art pack for a mod: a sheet, an atlas and the seeds that rebuild it. Not wired in yet.</p></li>
+<li data-z="stack"><h3><a href="https://github.com/SolutionsAsService/shadw-gaming-master">Gaming master index</a></h3><p>Listed there as a tool, next to the modding and forge repos.</p></li></ul>
+<h2>Limits, stated</h2>
+<ul class="plain"><li>Sprites are 16 by 16 or 32 by 32 (islands 32 or 64). There is no animation yet.</li>
+<li>Palettes are exact; console sprite counts and tile rules are not simulated.</li>
+<li>The art is procedural, so it is a start for an artist, not a replacement.</li></ul></div>
+</main>
+<footer class="foot"><div class="wrap">
+<p>PIXELGEN is part of the <a href="https://github.com/SolutionsAsService/shadw-gaming-master">SHADW game stack</a>. MIT licence. <a href="https://github.com/SolutionsAsService/pixel-art-gen">Source</a>.</p>
+<p>No accounts, no tracking, no network calls after the page loads. Everything is generated in your browser; the sheet you build is kept in this browser only.</p>
+</div></footer>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "project": "pixel-art-gen",
+  "static_dir": "site",
+  "routes": [{ "pattern": "/", "target": "static" }]
+}
